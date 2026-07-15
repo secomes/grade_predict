@@ -133,9 +133,7 @@
     <div class="nav-item active" data-view="calc">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>백분위 추정
     </div>
-    <div class="nav-item" data-view="records">
-      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>과목별 현황
-    </div>
+   
   </nav>
   <div class="cloud"><span class="led" id="cloudLed"></span><span id="cloudTxt">클라우드 연결 확인 중…</span></div>
 </aside>
@@ -196,13 +194,6 @@
     </div>
   </section>
 
-  <section id="view-records" class="hidden">
-    <div class="page-head"><div><div class="eyebrow">성적 분석</div><h1>과목별 현황</h1></div>
-      <button class="btn ghost" id="refreshBtn">새로고침</button></div>
-    <div class="banner" id="poolBanner">클라우드에 모인 과목별 점수 현황입니다.</div>
-    <div id="recList"></div>
-  </section>
-</main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
