@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>성적 백분위 분석 · 충북과학고</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF1F6; --panel:#FFFFFF; --ink:#1F2A37; --muted:#6B7280; --dim:#9AA4B2;
+    --line:#E5E9F0; --blue:#2563EB; --blueD:#1D4ED8; --blueSoft:#EEF4FF;
+    --green:#16A34A; --greenBg:#E7F6EC; --amber:#B45309; --amberBg:#FDF6E9;
+    --red:#DC2626; --redBg:#FDECEC;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:'Noto Sans KR',system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+  .mono{font-family:'IBM Plex Mono',monospace}
+
+  aside{width:248px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0}
+  .brand{display:flex;align-items:center;gap:11px;padding:22px 20px 18px;border-bottom:1px solid var(--line)}
+  .brand .logo{width:38px;height:38px;flex-shrink:0}
+  .brand .logo img{width:38px;height:38px;object-fit:contain}
+  .brand .name{font-weight:900;font-size:15px;line-height:1.2}
+  .brand .name small{display:block;font-weight:500;font-size:11px;color:var(--muted)}
+  .ver{font-size:10px;color:var(--dim);margin-left:auto;align-self:flex-start}
+  nav{padding:14px 12px;flex:1}
+  .nav-label{font-size:11px;color:var(--dim);padding:8px 12px 6px;letter-spacing:.06em;font-weight:700}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:9px;font-size:14px;color:var(--ink);cursor:pointer;font-weight:500;margin-bottom:2px;transition:background .12s}
+  .nav-item:hover{background:#F5F7FB}
+  .nav-item.active{background:var(--blueSoft);color:var(--blueD);font-weight:700}
+  .nav-item .ic{width:18px;height:18px;flex-shrink:0}
+  .cloud{display:flex;align-items:center;gap:7px;font-size:11px;padding:10px 16px;border-top:1px solid var(--line);color:var(--muted)}
+  .cloud .led{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+  .cloud .led.on{background:var(--green)} .cloud .led.off{background:var(--red)}
+  .profile{display:flex;align-items:center;gap:11px;padding:16px 20px;border-top:1px solid var(--line)}
+  .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#1D4ED8);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
+  .profile .who{font-size:13.5px;font-weight:700}
+  .profile .who small{display:block;font-weight:400;font-size:11.5px;color:var(--muted)}
+
+  main{flex:1;padding:34px 40px 60px;max-width:960px}
+  .eyebrow{font-size:13px;color:var(--muted);font-weight:500;margin-bottom:4px}
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:26px}
+  h1{font-size:27px;font-weight:900;letter-spacing:-.01em}
+  .btn{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:11px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:7px;transition:background .12s}
+  .btn:hover{background:var(--blueD)} .btn:disabled{background:var(--dim);cursor:not-allowed}
+  .btn.ghost{background:#fff;color:var(--blue);border:1px solid var(--line)}
+  .btn.ghost:hover{background:var(--blueSoft)}
+
+  .banner{background:var(--amberBg);border:1px solid #F3E4C4;color:#7C5410;border-radius:11px;padding:14px 18px;font-size:13.5px;margin-bottom:12px;line-height:1.5}
+  .banner.blue{background:var(--blueSoft);border-color:#D6E4FF;color:#1E40AF}
+  .banner.red{background:var(--redBg);border-color:#F5C2C2;color:#991B1B}
+  .banner b{font-weight:700} .banner code{font-family:'IBM Plex Mono',monospace;background:rgba(0,0,0,.05);padding:1px 5px;border-radius:4px;font-size:12.5px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px}
+  .card h2{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .card h2 .dot{width:6px;height:6px;border-radius:50%;background:var(--blue)}
+
+  label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;font-weight:500}
+  .field{margin-bottom:14px}
+  .grid{display:grid;gap:14px} .g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:1fr 1fr 1fr}
+  input,textarea{width:100%;background:#FBFCFE;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-size:15px;padding:11px 12px;outline:none;font-family:'IBM Plex Mono',monospace;transition:border-color .12s,box-shadow .12s}
+  textarea{font-size:13px;resize:vertical;min-height:60px}
+  input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .hint{font-size:11.5px;color:var(--dim);margin-top:5px}
+  .err{color:var(--red);font-size:12.5px;min-height:16px;margin-top:4px;font-weight:500}
+  .actions{display:flex;gap:10px;margin-top:6px;align-items:center}
+  .status{font-size:12.5px;color:var(--muted)}
+
+  .dd{position:relative}
+  .dd-btn{width:100%;background:#FBFCFE;border:1px solid var(--line);border-radius:9px;padding:11px 12px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-family:inherit;transition:border-color .12s}
+  .dd-btn:hover{border-color:#C7D2E5}
+  .dd-btn.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .dd-btn .chev{transition:transform .18s;color:var(--muted)}
+  .dd-btn.open .chev{transform:rotate(180deg)}
+  .dd-menu{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:0 12px 30px rgba(31,42,55,.12);padding:6px;z-index:20;display:grid;grid-template-columns:1fr 1fr;gap:3px}
+  .dd-opt{padding:10px 12px;border-radius:7px;font-size:14px;font-weight:500;cursor:pointer;transition:background .1s}
+  .dd-opt:hover{background:#F5F7FB}
+  .dd-opt.sel{background:var(--blueSoft);color:var(--blueD);font-weight:700}
+
+  .result{background:linear-gradient(180deg,#F8FAFF,#FFF);border:1px solid #DCE6FB}
+  .headline{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .headline .lbl{font-size:12px;color:var(--blue);font-weight:700}
+  .headline .big{font-size:52px;font-weight:900;line-height:1;letter-spacing:-.02em}
+  .headline .big small{font-size:24px;color:var(--muted);font-weight:500}
+  .modechip{font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px}
+  .modechip.est{background:var(--amberBg);color:var(--amber)}
+  .modechip.real{background:var(--greenBg);color:var(--green)}
+  .headnote{font-size:13px;color:var(--muted);margin-top:8px}
+  canvas{width:100%;height:auto;display:block;margin:14px 0 4px}
+  .statrow{display:flex;gap:30px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px;margin-top:14px}
+  .stat .k{font-size:11px;color:var(--dim);font-weight:600}
+  .stat .v{font-size:20px;margin-top:2px} .stat .v.hi{color:var(--blue);font-weight:600}
+
+  .bounds{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .bnd{background:#FBFCFE;border:1px solid var(--line);border-radius:11px;padding:15px 16px}
+  .bnd .n{font-size:11px;font-weight:700;color:var(--amber)}
+  .bnd .v{font-size:22px;margin:6px 0 3px;font-weight:600}
+  .bnd .v.void{color:var(--dim);font-size:15px;font-weight:500}
+  .bnd .d{font-size:12px;color:var(--muted);line-height:1.45}
+
+  .rec{display:flex;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .rec .num{width:56px;text-align:center;font-size:24px;font-weight:700;flex-shrink:0}
+  .rec .body{flex:1;padding:14px 6px}
+  .rec .t{font-size:17px;font-weight:700;margin-bottom:7px}
+  .badges{display:flex;gap:7px;flex-wrap:wrap}
+  .bdg{font-size:12px;font-weight:600;padding:4px 9px;border-radius:7px;background:#EEF1F6;color:#4B5563}
+  .bdg.green{background:var(--greenBg);color:var(--green)}
+  .bdg.blue{background:var(--blueSoft);color:var(--blueD)}
+  .empty{text-align:center;color:var(--dim);padding:44px 20px;font-size:14px}
+  .empty .ic{opacity:.4;margin-bottom:10px;font-size:26px}
+
+  .hidden{display:none!important}
+  @media(max-width:820px){aside{position:fixed;left:-260px}main{padding:24px 18px}.g2,.g3{grid-template-columns:1fr}.bounds{grid-template-columns:1fr}.headline .big{font-size:42px}}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="brand">
+    <div class="logo">
+      <img src="logo.png" alt="" onerror="this.style.display='none';document.getElementById('emblem').classList.remove('hidden')">
+      <svg id="emblem" class="hidden" viewBox="0 0 40 40" fill="none"><path d="M20 2 L35 10 V30 L20 38 L5 30 V10 Z" fill="#EEF4FF" stroke="#2563EB" stroke-width="1.6"/><circle cx="20" cy="20" r="3.2" fill="#1D4ED8"/><ellipse cx="20" cy="20" rx="10" ry="4" stroke="#2563EB" stroke-width="1.4" transform="rotate(30 20 20)"/><ellipse cx="20" cy="20" rx="10" ry="4" stroke="#2563EB" stroke-width="1.4" transform="rotate(-30 20 20)"/><ellipse cx="20" cy="20" rx="10" ry="4" stroke="#60A5FA" stroke-width="1.4" transform="rotate(90 20 20)"/></svg>
+    </div>
+    <div class="name">충북과학고<small>성적 백분위 분석</small></div>
+    <span class="ver mono">v3.0</span>
+  </div>
+  <nav>
+    <div class="nav-label">분석</div>
+    <div class="nav-item active" data-view="calc">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>백분위 추정
+    </div>
+    <div class="nav-item" data-view="records">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>과목별 현황
+    </div>
+  </nav>
+  <div class="cloud"><span class="led" id="cloudLed"></span><span id="cloudTxt">클라우드 연결 확인 중…</span></div>
+</aside>
+
+<main>
+  <section id="view-calc">
+    <div class="page-head"><div><div class="eyebrow">성적 분석</div><h1>백분위 추정</h1></div></div>
+
+  
+
+    <div class="card">
+      <h2><span class="dot"></span>점수 입력</h2>
+      <div class="field">
+        <label>과목</label>
+        <div class="dd" id="dd">
+          <button type="button" class="dd-btn" id="ddBtn"><span id="ddLabel">공수1</span>
+            <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div class="dd-menu hidden" id="ddMenu"></div>
+        </div>
+      </div>
+      <div class="field"><label>내 점수</label><input id="score" type="number" step="any" value="88"></div>
+      <div class="grid g3">
+        <div class="field"><label>전체 평균 <span style="color:var(--dim)">(선택)</span></label><input id="mean" type="number" step="any" placeholder="—"></div>
+        <div class="field"><label>최저점 <span style="color:var(--dim)">(선택)</span></label><input id="min" type="number" step="any" placeholder="—"></div>
+        <div class="field"><label>최고점 <span style="color:var(--dim)">(선택)</span></label><input id="max" type="number" step="any" placeholder="—"></div>
+      </div>
+      <div class="field"><label>전교생 수 <span style="color:var(--dim)">(선택 · σ 추정용)</span></label><input id="n" type="number" step="1" min="2" placeholder="미입력 시 100 가정"></div>
+      <div class="field">
+        <label>전교생 점수 한꺼번에 넣기 <span style="color:var(--dim)">(선택)</span></label>
+        <textarea id="raw" placeholder="쉼표·공백·줄바꿈 구분. 제출 시 이 점수들도 클라우드에 함께 저장됩니다."></textarea>
+        <div class="hint" id="rawCount"></div>
+      </div>
+      <div class="err" id="err"></div>
+      <div class="actions">
+        <button class="btn" id="submitBtn">제출 &amp; 저장</button>
+        <button class="btn ghost" id="calcBtn">제출 없이 미리보기</button>
+        <span class="status" id="submitStatus"></span>
+      </div>
+    </div>
+
+    <div class="card result hidden" id="resultCard">
+      <div class="headline"><span class="lbl">상위</span><span class="big" id="oPct">—<small>%</small></span><span class="modechip est" id="oMode">추정</span></div>
+      <div class="headnote" id="oNote"></div>
+      <canvas id="curve" width="820" height="210"></canvas>
+      <div class="statrow">
+        <div class="stat"><div class="k">σ (표준편차)</div><div class="v hi mono" id="oSigma">—</div></div>
+        <div class="stat"><div class="k">z-SCORE</div><div class="v mono" id="oZ">—</div></div>
+        <div class="stat"><div class="k">백분위</div><div class="v mono" id="oPercentile">—</div></div>
+        <div class="stat"><div class="k">예상 등수</div><div class="v mono" id="oRank">—</div></div>
+      </div>
+      <div style="height:16px"></div>
+      <div class="bounds">
+        <div class="bnd"><div class="n">체비셰프 / 칸텔리 보장</div><div class="v mono" id="oCheby">—</div><div class="d" id="oChebyD"></div></div>
+        <div class="bnd"><div class="n">마르코프 보장</div><div class="v mono" id="oMarkov">—</div><div class="d" id="oMarkovD"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-records" class="hidden">
+    <div class="page-head"><div><div class="eyebrow">성적 분석</div><h1>과목별 현황</h1></div>
+      <button class="btn ghost" id="refreshBtn">새로고침</button></div>
+    <div class="banner" id="poolBanner">클라우드에 모인 과목별 점수 현황입니다.</div>
+    <div id="recList"></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+   ⬇⬇⬇  여기 두 줄만 본인 값으로 바꾸세요  ⬇⬇⬇
+   Supabase 대시보드 → Project Settings → Data API 에서 복사
+============================================================ */
+const SUPABASE_URL = "https://lxxiepcszhiduetoeiec.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4eGllcGNzemhpZHVldG9laWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwNTQ1MzUsImV4cCI6MjA5OTYzMDUzNX0.seeGr6JDz6VkU1Zui4PVhwiaQ_KBJmu5JIEir1YaCZ4 ";
+/* ============================================================ */
+
+const CONFIGURED = !SUPABASE_URL.includes("여기에") && !SUPABASE_KEY.includes("여기에");
+let db=null;
+if(CONFIGURED && window.supabase){ db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY); }
+
+const $=id=>document.getElementById(id);
+const fmt=(x,d=1)=>Number(x).toFixed(d);
+const parseRaw=s=>((s||'').match(/-?\d+(?:\.\d+)?/g)||[]).map(Number).filter(v=>Number.isFinite(v));
+
+// ---------- cloud status ----------
+function setCloud(ok,msg){$('cloudLed').className='led '+(ok?'on':'off');$('cloudTxt').textContent=msg;}
+if(!CONFIGURED){ setCloud(false,'클라우드 미설정'); $('setupBanner').classList.remove('hidden'); }
+else if(!window.supabase){ setCloud(false,'라이브러리 로드 실패'); }
+else { setCloud(true,'클라우드 연결됨'); }
+
+// ---------- subject dropdown ----------
+const SUBJECTS=['공수1','공수2','물리','생물','통과1','통과2','정보','국어','영어','역사'];
+let selectedSubject=SUBJECTS[0];
+(function(){
+  const menu=$('ddMenu');
+  menu.innerHTML=SUBJECTS.map(s=>`<div class="dd-opt${s===selectedSubject?' sel':''}" data-s="${s}">${s}</div>`).join('');
+  const btn=$('ddBtn');
+  btn.addEventListener('click',e=>{e.stopPropagation();menu.classList.toggle('hidden');btn.classList.toggle('open',!menu.classList.contains('hidden'));});
+  menu.querySelectorAll('.dd-opt').forEach(o=>o.addEventListener('click',async()=>{
+    selectedSubject=o.dataset.s; $('ddLabel').textContent=selectedSubject;
+    menu.querySelectorAll('.dd-opt').forEach(x=>x.classList.toggle('sel',x.dataset.s===selectedSubject));
+    menu.classList.add('hidden'); btn.classList.remove('open');
+    await loadPool(selectedSubject); recompute();
+  }));
+  document.addEventListener('click',()=>{menu.classList.add('hidden');btn.classList.remove('open');});
+})();
+
+// ---------- pool cache (fetched from cloud) ----------
+const poolCache={};
+async function loadPool(subject){
+  if(!db){poolCache[subject]=[];return [];}
+  try{
+    const {data,error}=await db.from('scores').select('score').eq('subject',subject);
+    if(error)throw error;
+    poolCache[subject]=data.map(d=>Number(d.score)).filter(Number.isFinite);
+  }catch(e){ setCloud(false,'조회 오류'); poolCache[subject]=poolCache[subject]||[]; }
+  return poolCache[subject];
+}
+
+// ---------- math ----------
+const D2=[[2,1.128],[3,1.693],[4,2.059],[5,2.326],[6,2.534],[7,2.704],[8,2.847],[9,2.970],[10,3.078],[12,3.258],[15,3.472],[20,3.735],[25,3.931],[30,4.086],[40,4.322],[50,4.498],[75,4.806],[100,5.015],[150,5.297],[200,5.492],[500,6.073],[1000,6.483]];
+function d2(n){n=Math.max(2,n);if(n<=D2[0][0])return D2[0][1];if(n>=D2.at(-1)[0])return D2.at(-1)[1];for(let i=0;i<D2.length-1;i++){const[a,va]=D2[i],[b,vb]=D2[i+1];if(n>=a&&n<=b)return va+(vb-va)*(n-a)/(b-a);}return 4;}
+function erf(x){const t=1/(1+0.3275911*Math.abs(x));const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return x>=0?y:-y;}
+const Phi=z=>0.5*(1+erf(z/Math.SQRT2));
+
+// ---------- compute (sync, uses cached pool) ----------
+function compute(){
+  const err=$('err');err.textContent='';
+  const subject=selectedSubject;
+  const s=+$('score').value;
+  const muV=$('mean').value.trim(),loV=$('min').value.trim(),hiV=$('max').value.trim(),nV=$('n').value.trim();
+  const rawIn=parseRaw($('raw').value);
+  const savedPool=poolCache[subject]||[];
+
+  $('rawCount').innerHTML='이번 입력 인식 <b style="color:var(--blue)">'+rawIn.length+'개</b> · '+subject+' 클라우드 누적 <b style="color:var(--blue)">'+savedPool.length+'개</b>';
+
+  if($('score').value===''||isNaN(s)){err.textContent='내 점수를 입력하세요.';return null;}
+
+  const pool=[...savedPool,...rawIn];   // 미리보기: 붙여넣은 것도 반영
+  const poolN=pool.length;
+
+  let sigma,mean,upper,z,mode,nUsed=null;
+  if(poolN>=5){
+    mean=pool.reduce((a,b)=>a+b,0)/poolN;
+    sigma=Math.sqrt(pool.reduce((a,b)=>a+(b-mean)**2,0)/poolN);
+    upper=pool.filter(v=>v>s).length/poolN*100;
+    z=sigma>0?(s-mean)/sigma:0; mode='real';
+  }else{
+    const mu=+muV,lo=+loV,hi=+hiV;
+    if(muV===''||loV===''||hiV===''||[mu,lo,hi].some(isNaN)){
+      err.textContent='클라우드에 점수가 5개 이상 모이거나, 전체 평균·최저·최고점을 모두 입력해야 계산됩니다.';return null;}
+    if(hi<=lo){err.textContent='최고점은 최저점보다 커야 합니다.';return null;}
+    if(mu<lo||mu>hi){err.textContent='평균이 최저~최고 범위 밖입니다.';return null;}
+    nUsed=nV===''?100:(Math.round(+nV)||2);
+    sigma=(hi-lo)/d2(nUsed); mean=mu; z=sigma>0?(s-mu)/sigma:0; upper=(1-Phi(z))*100; mode='est';
+  }
+  return {subject,s,rawIn,sigma,mean,upper,z,mode,poolN,nUsed};
+}
+function recompute(){const R=compute();if(R)render(R);}
+
+// ---------- render ----------
+function render(R){
+  $('resultCard').classList.remove('hidden');
+  const est=R.mode==='est';
+  $('oMode').className='modechip '+(est?'est':'real');
+  $('oMode').textContent=est?'RANGE 추정':'실측 '+R.poolN+'개';
+  $('oPct').innerHTML=fmt(R.upper,R.upper<10?2:1)+'<small>%</small>';
+  $('oNote').textContent=est
+    ? 'σ ≈ (최고−최저)/d₂('+R.nUsed+') = '+fmt(R.sigma,2)+' 로 추정한 정규가정 백분위입니다.'
+    : '클라우드 실측 점수 '+R.poolN+'개 중에서의 정확 백분위입니다. (등수도 이 '+R.poolN+'개 기준)';
+  $('oSigma').textContent=fmt(R.sigma,2);
+  $('oZ').textContent=(R.z>=0?'+':'')+fmt(R.z,2);
+  $('oPercentile').textContent=fmt(100-R.upper,1)+'%';
+  const total=est?R.nUsed:R.poolN;
+  $('oRank').textContent='약 '+Math.max(1,Math.round(R.upper/100*total))+' / '+total+'등';
+
+  const cb=$('oCheby'),cbd=$('oChebyD');
+  if(R.z>0){const b=1/(1+R.z*R.z)*100;cb.className='v mono';cb.textContent='상위 ≤ '+fmt(b,1)+'%';cbd.textContent='분포가 어떻든 나보다 잘한 사람은 많아야 '+fmt(b,1)+'%. 최소 상위 '+fmt(b,1)+'% 이내 확정.';}
+  else{cb.className='v void mono';cb.textContent='정보 없음';cbd.textContent='내 점수가 평균 이하(z≤0)라 유의미한 상한이 없습니다.';}
+
+  const mk=$('oMarkov'),mkd=$('oMarkovD');
+  if(R.s>R.mean&&R.s>0){const b=R.mean/R.s*100;
+    if(b<100){mk.className='v mono';mk.textContent='상위 ≤ '+fmt(b,1)+'%';mkd.textContent='점수 ≥ 0 사실만으로도 나 이상은 많아야 '+fmt(b,1)+'%.';}
+    else{mk.className='v void mono';mk.textContent='정보 없음';mkd.textContent='μ/점수 ≥ 1 이라 상한이 무의미합니다.';}}
+  else{mk.className='v void mono';mk.textContent='정보 없음';mkd.textContent='평균 이하라 마르코프 상한이 무의미합니다.';}
+
+  drawCurve(R.z);
+}
+
+function drawCurve(z){
+  const cv=$('curve'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height,pad=26,base=H-28;
+  ctx.clearRect(0,0,W,H);
+  const zmin=-3.6,zmax=3.6,span=zmax-zmin;
+  const X=zz=>pad+(zz-zmin)/span*(W-2*pad),pdf=zz=>Math.exp(-zz*zz/2),peak=pdf(0);
+  const Y=zz=>base-pdf(zz)/peak*(base-pad-4);
+  ctx.strokeStyle='#E5E9F0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad,base);ctx.lineTo(W-pad,base);ctx.stroke();
+  const zc=Math.max(zmin,Math.min(zmax,z));
+  ctx.beginPath();ctx.moveTo(X(zc),base);for(let zz=zc;zz<=zmax;zz+=0.03)ctx.lineTo(X(zz),Y(zz));ctx.lineTo(X(zmax),base);ctx.closePath();
+  const g=ctx.createLinearGradient(0,pad,0,base);g.addColorStop(0,'rgba(37,99,235,.28)');g.addColorStop(1,'rgba(37,99,235,.04)');ctx.fillStyle=g;ctx.fill();
+  ctx.beginPath();for(let zz=zmin;zz<=zmax;zz+=0.02){const x=X(zz),y=Y(zz);zz===zmin?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.strokeStyle='#94A3B8';ctx.lineWidth=1.6;ctx.stroke();
+  ctx.setLineDash([4,4]);ctx.strokeStyle='#2563EB';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(X(zc),base);ctx.lineTo(X(zc),Y(zc));ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#2563EB';ctx.beginPath();ctx.arc(X(zc),Y(zc),4,0,7);ctx.fill();
+  ctx.fillStyle='#9AA4B2';ctx.font='11px IBM Plex Mono';ctx.textAlign='center';[-3,-2,-1,0,1,2,3].forEach(t=>ctx.fillText((t>0?'+':'')+t+'σ',X(t),base+16));
+  ctx.fillStyle='#2563EB';ctx.font='12px IBM Plex Mono';ctx.fillText('내 점수',X(zc),Y(zc)-11);
+}
+
+// ---------- submit (insert to cloud) ----------
+async function submit(){
+  if(!db){$('err').textContent='클라우드가 설정되지 않아 저장할 수 없습니다.';return;}
+  const s=+$('score').value;
+  if($('score').value===''||isNaN(s)){$('err').textContent='내 점수를 입력하세요.';return;}
+  const subject=selectedSubject;
+  const rawIn=parseRaw($('raw').value);
+  const rows=[{subject,score:s},...rawIn.map(v=>({subject,score:v}))];
+
+  const btn=$('submitBtn');btn.disabled=true;$('submitStatus').textContent='저장 중…';
+  try{
+    const {error}=await db.from('scores').insert(rows);
+    if(error)throw error;
+    $('submitStatus').textContent=rows.length+'개 저장 완료 ✓';
+    $('raw').value='';
+    await loadPool(subject); recompute();
+    setCloud(true,'클라우드 연결됨');
+  }catch(e){
+    $('submitStatus').textContent='';
+    $('err').textContent='저장 실패: '+(e.message||e)+' (테이블/정책 설정을 확인하세요)';
+    setCloud(false,'저장 오류');
+  }finally{ btn.disabled=false; setTimeout(()=>{$('submitStatus').textContent='';},4000); }
+}
+
+// ---------- records view (per-subject aggregate) ----------
+async function renderRecords(){
+  const list=$('recList');
+  if(!db){list.innerHTML='<div class="empty"><div class="ic">☁️</div>클라우드가 설정되지 않았습니다.</div>';$('poolBanner').classList.add('hidden');return;}
+  list.innerHTML='<div class="empty">불러오는 중…</div>';
+  let data;
+  try{ const r=await db.from('scores').select('subject,score'); if(r.error)throw r.error; data=r.data; }
+  catch(e){ list.innerHTML='<div class="empty">조회 오류: '+(e.message||e)+'</div>';return; }
+
+  const by={};
+  data.forEach(d=>{const k=d.subject;(by[k]=by[k]||[]).push(Number(d.score));});
+  const subs=Object.keys(by).sort((a,b)=>by[b].length-by[a].length);
+  $('poolBanner').classList.remove('hidden');
+  $('poolBanner').innerHTML='총 <b>'+data.length+'개</b> 점수 · <b>'+subs.length+'개</b> 과목에 누적됨.';
+  if(!subs.length){list.innerHTML='<div class="empty"><div class="ic">📊</div>아직 저장된 점수가 없습니다.</div>';return;}
+  list.innerHTML=subs.map((sub,i)=>{
+    const arr=by[sub],n=arr.length,mean=arr.reduce((a,b)=>a+b,0)/n;
+    const sd=Math.sqrt(arr.reduce((a,b)=>a+(b-mean)**2,0)/n);
+    const enough=n>=5;
+    return `<div class="rec"><div class="num">${i+1}</div><div class="body">
+      <div class="t">${esc(sub)}</div><div class="badges">
+        <span class="bdg blue">${n}개</span>
+        <span class="bdg">평균 ${fmt(mean,1)}</span>
+        <span class="bdg">σ ${fmt(sd,2)}</span>
+        <span class="bdg">최저 ${Math.min(...arr)} / 최고 ${Math.max(...arr)}</span>
+        <span class="bdg ${enough?'green':''}">${enough?'실측 계산 가능':'5개↑ 필요'}</span>
+      </div></div></div>`;
+  }).join('');
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- view switching ----------
+document.querySelectorAll('.nav-item').forEach(el=>el.addEventListener('click',()=>{
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));el.classList.add('active');
+  const v=el.dataset.view;
+  $('view-calc').classList.toggle('hidden',v!=='calc');
+  $('view-records').classList.toggle('hidden',v!=='records');
+  if(v==='records')renderRecords();
+}));
+
+// ---------- bind ----------
+$('submitBtn').addEventListener('click',submit);
+$('calcBtn').addEventListener('click',recompute);
+$('refreshBtn').addEventListener('click',renderRecords);
+['score','mean','min','max','n','raw'].forEach(id=>$(id).addEventListener('input',recompute));
+
+// ---------- init ----------
+(async()=>{ await loadPool(selectedSubject); recompute(); })();
+</script>
+</body>
+</html>
